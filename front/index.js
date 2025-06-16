@@ -34,6 +34,39 @@ const clearPuzzle = () => {
   });
 };
 
+const setPuzzle = (puzzle) => {
+  const inputs = document.querySelectorAll("#puzzle input");
+  for (let i = 0; i < inputs.length && i < puzzle.length; i++) {
+    inputs[i].value = puzzle[i] === "." ? "" : puzzle[i];
+  }
+};
+
+const loadPuzzle = async () => {
+  try {
+    const options = {
+      method: "GET",
+      url: "http://localhost:8000/api/puzzle",
+      headers: {
+        "API-KEY":
+          "438f7c88057ac8f4162df40444c8d3b0c6fc6138f21d5a52743a2a1f620bb287",
+        "Content-Type": "application/json",
+      },
+    };
+
+    // Make the request to your API using axios
+    const response = await axios.request(options);
+
+    // With axios, the data is already parsed and available in response.data
+    const solvablePuzzle = response.data.puzzle;
+
+    setPuzzle(solvablePuzzle);
+    // showStatus("Example puzzle loaded!");
+  } catch (error) {
+    console.error("Error loading puzzle:", error);
+    // showStatus("Failed to load example puzzle!");
+  }
+};
+
 const solve = async () => {
   joinValues();
 
