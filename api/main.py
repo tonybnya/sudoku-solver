@@ -1,9 +1,17 @@
 from fastapi import Depends, FastAPI
 from sqlalchemy.orm import Session
+import os
+from dotenv import load_dotenv
 
 from crud import get_random_puzzle
 from database import SessionLocal, engine
 from models import Base
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Access environment variables
+API_KEY = os.getenv("API_KEY")
 
 app = FastAPI(title="Sudoku API", root_path="/api")
 
