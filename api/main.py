@@ -5,7 +5,7 @@ from crud import get_random_puzzle
 from database import SessionLocal, engine
 from models import Base
 
-app = FastAPI(title="Sudoku API")
+app = FastAPI(title="Sudoku API", root_path="/api")
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -18,6 +18,27 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+@app.get("/")
+def read_api_root():
+    return {
+        "message": "Welcome to the Sudoku Solver API",
+        "description": "This API provides solvable sudoku puzzles.",
+        "endpoints": [
+            {
+                "path": "/api/", 
+                "method": "GET",
+                "description": "Returns API information and available endpoints"
+            },
+            {
+                "path": "/api/puzzle", 
+                "method": "GET", 
+                "description": "Returns a random sudoku puzzle"
+            }
+        ],
+        "version": "1.0"
+    }
 
 
 @app.get("/puzzle")
