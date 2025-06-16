@@ -7,7 +7,7 @@ from crud import get_all_puzzles, get_random_puzzle
 from database import SessionLocal, engine
 from models import Base
 
-app = FastAPI(title="Sudoku API", root_path="/api")
+app = FastAPI(title="Sudoku API")
 
 # Configure CORS
 app.add_middleware(
