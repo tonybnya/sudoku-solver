@@ -1,20 +1,11 @@
-import os
 
-from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, HTTPException
-from fastapi.requests import Request
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-from crud import get_random_puzzle, get_all_puzzles
+from crud import get_all_puzzles, get_random_puzzle
 from database import SessionLocal, engine
 from models import Base
-
-# Load environment variables from .env file
-load_dotenv()
-
-# Access environment variables
-API_KEY = os.getenv("API_KEY")
 
 app = FastAPI(title="Sudoku API", root_path="/api")
 
@@ -67,15 +58,7 @@ def read_api_root():
 
 
 @app.get("/puzzle")
-def read_random_puzzle(request: Request, db: Session = Depends(get_db), api_key: str = None):
-    # Get API key from request header
-    if not api_key:
-        api_key = request.headers.get("API_KEY") or request.headers.get("api_key") or request.headers.get("API-KEY") or request.headers.get("api-key")
-
-    # Validate API key
-    if api_key != API_KEY:
-        raise HTTPException(status_code=401, detail="Invalid API key")
-
+def read_random_puzzle(db: Session = Depends(get_db)):
     puzzle = get_random_puzzle(db)
     if puzzle:
         return {"puzzle": puzzle.puzzle}
@@ -83,15 +66,7 @@ def read_random_puzzle(request: Request, db: Session = Depends(get_db), api_key:
 
 
 @app.get("/puzzles")
-def read_all_puzzles(request: Request, db: Session = Depends(get_db), api_key: str = None):
-    # Get API key from request header
-    if not api_key:
-        api_key = request.headers.get("API_KEY") or request.headers.get("api_key") or request.headers.get("API-KEY") or request.headers.get("api-key")
-
-    # Validate API key
-    if api_key != API_KEY:
-        raise HTTPException(status_code=401, detail="Invalid API key")
-
+def read_all_puzzles(db: Session = Depends(get_db)):
     puzzles = get_all_puzzles(db)
     if puzzles:
         return {"puzzles": [puzzle.puzzle for puzzle in puzzles]}

@@ -1,12 +1,7 @@
 [project]
-name = "api"
+name = "sudoku-api"
 version = "0.1.0"
-description = "Add your description here"
+description = "This API serve one random puzzle to solve at a time."
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = [
-    "fastapi>=0.115.12",
-    "python-dotenv>=1.1.0",
-    "sqlalchemy>=2.0.41",
-    "uvicorn>=0.34.3",
-]
+dependencies = ["fastapi>=0.115.12", "sqlalchemy>=2.0.41", "uvicorn>=0.34.3"]
