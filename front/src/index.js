@@ -19,22 +19,16 @@ const submission = [];
 
 // Access environment variables directly using import.meta.env
 const config = {
-  apiUrl: import.meta.env.VITE_API_URL || "http://localhost:8000/api/puzzle",
-  apiKey: import.meta.env.VITE_API_KEY || "your-api-key-here",
-  rapidApiKey:
-    import.meta.env.VITE_RAPIDAPI_KEY ||
-    "429d4b4e4emshd73d3b4cccd15edp142cc9jsnc87c2c1511fa",
-  rapidApiHost:
-    import.meta.env.VITE_RAPIDAPI_HOST || "solve-sudoku.p.rapidapi.com",
+  // apiUrl: import.meta.env.VITE_API_URL || "http://localhost:8000/api/puzzle",
+  // rapidApiKey:
+  //   import.meta.env.VITE_RAPIDAPI_KEY ||
+  //   "429d4b4e4emshd73d3b4cccd15edp142cc9jsnc87c2c1511fa",
+  // rapidApiHost:
+  //   import.meta.env.VITE_RAPIDAPI_HOST || "solve-sudoku.p.rapidapi.com",
+  apiUrl: import.meta.env.VITE_API_URL,
+  rapidApiKey: import.meta.env.VITE_RAPIDAPI_KEY,
+  rapidApiHost: import.meta.env.VITE_RAPIDAPI_HOST,
 };
-
-// Log the loaded configuration
-console.log("Environment configuration loaded:", {
-  apiUrl: config.apiUrl,
-  apiKey: config.apiKey ? "***" : "not set", // Don't log the actual key
-  rapidApiKey: config.rapidApiKey ? "***" : "not set", // Don't log the actual key
-  rapidApiHost: config.rapidApiHost,
-});
 
 const joinValues = () => {
   // Clear the submission array before adding new values
@@ -55,14 +49,17 @@ const joinValues = () => {
       submission.push(".");
     }
   });
-  console.log('Submission array:', submission);
+  console.log("Submission array:", submission);
 };
 
 const fillSolution = (isSolvable, solution) => {
   const inputs = document.querySelectorAll("#puzzle input");
-  
-  console.log('fillSolution called with:', { isSolvable, solution: solution ? 'provided' : 'not provided' });
-  
+
+  console.log("fillSolution called with:", {
+    isSolvable,
+    solution: solution ? "provided" : "not provided",
+  });
+
   if (isSolvable === true && solution) {
     // Puzzle is solvable and we have a solution
     inputs.forEach((input, i) => {
@@ -76,7 +73,10 @@ const fillSolution = (isSolvable, solution) => {
       showStatus("The puzzle is not solvable! Check for mistakes.", true);
     } else if (!solution && isSolvable === true) {
       // Strange case: API says it's solvable but didn't return a solution
-      showStatus("Error: API reported puzzle as solvable but provided no solution", true);
+      showStatus(
+        "Error: API reported puzzle as solvable but provided no solution",
+        true,
+      );
     } else {
       // Default error case
       showStatus("Unable to solve the puzzle. Please try again.", true);
@@ -110,7 +110,6 @@ const loadPuzzle = async () => {
       method: "GET",
       url: apiUrl,
       headers: {
-        "API-KEY": config.apiKey,
         "Content-Type": "application/json",
       },
     };
@@ -150,13 +149,13 @@ const solve = async () => {
   const puzzleString = submission.join("");
   console.log("Puzzle to solve:", puzzleString);
   console.log("Puzzle string length:", puzzleString.length);
-  
+
   // Debug the puzzle format
   let validChars = 0;
   let invalidChars = [];
   for (let i = 0; i < puzzleString.length; i++) {
     const char = puzzleString[i];
-    if (char === '.' || (char >= '1' && char <= '9')) {
+    if (char === "." || (char >= "1" && char <= "9")) {
       validChars++;
     } else {
       invalidChars.push({ index: i, char: char });
@@ -164,7 +163,7 @@ const solve = async () => {
   }
   console.log(`Valid characters: ${validChars}/${puzzleString.length}`);
   if (invalidChars.length > 0) {
-    console.log('Invalid characters found:', invalidChars);
+    console.log("Invalid characters found:", invalidChars);
   }
 
   // Check if the puzzle is valid (contains 81 characters)
@@ -194,52 +193,58 @@ const solve = async () => {
       "x-rapidapi-key": config.rapidApiKey,
       "x-rapidapi-host": config.rapidApiHost,
       "Content-Type": "application/json",
-      "Accept": "application/json"
+      Accept: "application/json",
     },
     // With axios, don't stringify the data - axios does that for you
     data: {
-      puzzle: puzzleString
-    }
+      puzzle: puzzleString,
+    },
   };
-  
+
   // Let's print the exact JSON payload for debugging
-  console.log('Request payload:', JSON.stringify({
-    puzzle: puzzleString
-  }));
+  console.log(
+    "Request payload:",
+    JSON.stringify({
+      puzzle: puzzleString,
+    }),
+  );
 
   try {
     console.log(`Sending solve request to: https://${config.rapidApiHost}/`);
-    console.log('Request options:', {
+    console.log("Request options:", {
       method: options.method,
       url: options.url,
       headers: {
         ...options.headers,
-        'x-rapidapi-key': '***' // Don't log the actual key
+        "x-rapidapi-key": "***", // Don't log the actual key
       },
-      data: options.data
+      data: options.data,
     });
-    
+
     const response = await axios.request(options);
 
     // Log detailed response information
-    console.log('API Response Status:', response.status);
-    console.log('API Response Headers:', response.headers);
-    console.log('API Response Data:', JSON.stringify(response.data, null, 2));
+    console.log("API Response Status:", response.status);
+    console.log("API Response Headers:", response.headers);
+    console.log("API Response Data:", JSON.stringify(response.data, null, 2));
 
     if (response.data) {
       const isSolvable = response.data.solvable;
       const solution = response.data.solution;
-      
-      console.log('Is puzzle solvable?', isSolvable);
-      console.log('Solution:', solution ? solution.substring(0, 20) + '...' : 'none');
-      
+
+      console.log("Is puzzle solvable?", isSolvable);
+      console.log(
+        "Solution:",
+        solution ? solution.substring(0, 20) + "..." : "none",
+      );
+
       // Check if both values are present and valid
       if (isSolvable === undefined) {
-        console.error('API response missing solvable property');
-        showStatus('Invalid API response format', true);
+        console.error("API response missing solvable property");
+        showStatus("Invalid API response format", true);
         return;
       }
-      
+
       fillSolution(isSolvable, solution);
     } else {
       showStatus("Invalid response from solver service", true);

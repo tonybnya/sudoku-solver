@@ -3,7 +3,15 @@ import legacy from '@vitejs/plugin-legacy';
 import { config as dotenvConfig } from 'dotenv';
 
 // Load environment variables from .env file
-dotenvConfig();
+const env = dotenvConfig().parsed;
+
+// Log loaded environment variables (without showing the actual values)
+console.log('Loaded environment variables:', 
+  Object.keys(env || {}).reduce((acc, key) => {
+    acc[key] = key.includes('KEY') ? '[SECRET]' : env[key];
+    return acc;
+  }, {})
+);
 
 // https://vitejs.dev/config/
 export default defineConfig({
