@@ -1,9 +1,9 @@
 from fastapi import Depends, FastAPI
 from sqlalchemy.orm import Session
 
-from .crud import get_random_puzzle
-from .database import SessionLocal, engine
-from .models import Base
+from crud import get_random_puzzle
+from database import SessionLocal, engine
+from models import Base
 
 app = FastAPI(title="Sudoku API")
 

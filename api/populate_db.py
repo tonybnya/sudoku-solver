@@ -1,5 +1,5 @@
-from .database import SessionLocal, engine
-from .models import Base, Puzzle
+from database import SessionLocal, engine
+from models import Base, Puzzle
 
 # Solvable puzzles
 sample_puzzles = [
