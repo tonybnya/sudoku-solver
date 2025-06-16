@@ -1,7 +1,7 @@
 const puzzle = document.querySelector("#puzzle");
 const solveBtn = document.querySelector("#solve-btn");
 const clearBtn = document.querySelector("#clear-btn");
-const status = document.querySelector("#status");
+const statusDiv = document.querySelector("#status");
 const puzzleBtn = document.querySelector("#puzzle-btn");
 const squares = 81;
 const submission = [];
@@ -24,6 +24,9 @@ const fillSolution = (isSolvable, solution) => {
     inputs.forEach((input, i) => {
       input.value = solution[i];
     });
+    showStatus("Puzzle solved!");
+  } else {
+    showStatus("Puzzle not solvable!", true);
   }
 };
 
@@ -32,6 +35,7 @@ const clearPuzzle = () => {
   inputs.forEach((input) => {
     input.value = "";
   });
+  showStatus("Puzzle cleared!");
 };
 
 const setPuzzle = (puzzle) => {
@@ -60,11 +64,20 @@ const loadPuzzle = async () => {
     const solvablePuzzle = response.data.puzzle;
 
     setPuzzle(solvablePuzzle);
-    // showStatus("Example puzzle loaded!");
+    showStatus("Puzzle loaded!");
   } catch (error) {
     console.error("Error loading puzzle:", error);
-    // showStatus("Failed to load example puzzle!");
+    showStatus("Failed to puzzle!");
   }
+};
+
+const showStatus = (message, isError = false) => {
+  statusDiv.textContent = message;
+  statusDiv.className = `status ${isError ? "error" : "success"}`;
+  statusDiv.style.display = "block";
+  setTimeout(() => {
+    statusDiv.style.display = "none";
+  }, 3000);
 };
 
 const solve = async () => {
