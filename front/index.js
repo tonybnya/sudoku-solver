@@ -49,10 +49,9 @@ const loadPuzzle = async () => {
   try {
     const options = {
       method: "GET",
-      url: "http://localhost:8000/api/puzzle",
+      url: `${config.apiUrl}/puzzle`,
       headers: {
-        "API-KEY":
-          "438f7c88057ac8f4162df40444c8d3b0c6fc6138f21d5a52743a2a1f620bb287",
+        "API-KEY": config.apiKey,
         "Content-Type": "application/json",
       },
     };
