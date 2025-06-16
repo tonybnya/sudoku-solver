@@ -6,7 +6,7 @@ from fastapi.requests import Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-from crud import get_random_puzzle
+from crud import get_random_puzzle, get_all_puzzles
 from database import SessionLocal, engine
 from models import Base
 
@@ -55,6 +55,11 @@ def read_api_root():
                 "path": "/api/puzzle",
                 "method": "GET",
                 "description": "Returns a random sudoku puzzle"
+            },
+            {
+                "path": "/api/puzzles",
+                "method": "GET",
+                "description": "Returns all sudoku puzzles"
             }
         ],
         "version": "1.0"
@@ -74,4 +79,20 @@ def read_random_puzzle(request: Request, db: Session = Depends(get_db), api_key:
     puzzle = get_random_puzzle(db)
     if puzzle:
         return {"puzzle": puzzle.puzzle}
+    return {"error": "No puzzles found."}
+
+
+@app.get("/puzzles")
+def read_all_puzzles(request: Request, db: Session = Depends(get_db), api_key: str = None):
+    # Get API key from request header
+    if not api_key:
+        api_key = request.headers.get("API_KEY") or request.headers.get("api_key") or request.headers.get("API-KEY") or request.headers.get("api-key")
+
+    # Validate API key
+    if api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+    puzzles = get_all_puzzles(db)
+    if puzzles:
+        return {"puzzles": [puzzle.puzzle for puzzle in puzzles]}
     return {"error": "No puzzles found."}
