@@ -1,8 +1,10 @@
+import os
+
+from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.requests import Request
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-import os
-from dotenv import load_dotenv
 
 from crud import get_random_puzzle
 from database import SessionLocal, engine
@@ -15,6 +17,15 @@ load_dotenv()
 API_KEY = os.getenv("API_KEY")
 
 app = FastAPI(title="Sudoku API", root_path="/api")
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -36,13 +47,13 @@ def read_api_root():
         "description": "This API provides solvable sudoku puzzles.",
         "endpoints": [
             {
-                "path": "/api/", 
+                "path": "/api/",
                 "method": "GET",
                 "description": "Returns API information and available endpoints"
             },
             {
-                "path": "/api/puzzle", 
-                "method": "GET", 
+                "path": "/api/puzzle",
+                "method": "GET",
                 "description": "Returns a random sudoku puzzle"
             }
         ],
@@ -54,12 +65,12 @@ def read_api_root():
 def read_random_puzzle(request: Request, db: Session = Depends(get_db), api_key: str = None):
     # Get API key from request header
     if not api_key:
-        api_key = request.headers.get("API-KEY") or request.headers.get("api-key")
-    
+        api_key = request.headers.get("API_KEY") or request.headers.get("api_key") or request.headers.get("API-KEY") or request.headers.get("api-key")
+
     # Validate API key
     if api_key != API_KEY:
         raise HTTPException(status_code=401, detail="Invalid API key")
-    
+
     puzzle = get_random_puzzle(db)
     if puzzle:
         return {"puzzle": puzzle.puzzle}
