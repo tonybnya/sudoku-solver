@@ -1,4 +1,5 @@
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException
+from fastapi.requests import Request
 from sqlalchemy.orm import Session
 import os
 from dotenv import load_dotenv
@@ -50,7 +51,15 @@ def read_api_root():
 
 
 @app.get("/puzzle")
-def read_random_puzzle(db: Session = Depends(get_db)):
+def read_random_puzzle(request: Request, db: Session = Depends(get_db), api_key: str = None):
+    # Get API key from request header
+    if not api_key:
+        api_key = request.headers.get("API-KEY") or request.headers.get("api-key")
+    
+    # Validate API key
+    if api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    
     puzzle = get_random_puzzle(db)
     if puzzle:
         return {"puzzle": puzzle.puzzle}
