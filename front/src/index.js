@@ -23,7 +23,7 @@ const rapidApiHost = import.meta.env.VITE_RAPIDAPI_HOST;
 const config = {
   apiUrl,
   rapidApiKey,
-  rapidApiHost
+  rapidApiHost,
 };
 
 const joinValues = () => {
@@ -175,7 +175,7 @@ const solve = async () => {
       "x-rapidapi-key": config.rapidApiKey,
       "x-rapidapi-host": config.rapidApiHost,
       "Content-Type": "application/json",
-      Accept: "application/json",
+      // Accept: "application/json",
     },
     data: {
       puzzle: puzzleString,
