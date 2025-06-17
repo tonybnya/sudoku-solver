@@ -7,7 +7,17 @@ from crud import get_all_puzzles, get_random_puzzle
 from database import SessionLocal, engine
 from models import Base
 
-app = FastAPI(title="Sudoku API", root_path="/api")
+app = FastAPI(title="Sudoku API")
+
+# Create an API router with the /api prefix
+api_router = FastAPI()
+app.mount("/api", api_router)
+
+# Add root redirect
+@app.get("/")
+def root_redirect():
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/api/")
 
 # Configure CORS
 app.add_middleware(
@@ -31,7 +41,7 @@ def get_db():
         db.close()
 
 
-@app.get("/")
+@api_router.get("/")
 def read_api_root():
     return {
         "message": "Welcome to the Sudoku Solver API",
@@ -57,7 +67,7 @@ def read_api_root():
     }
 
 
-@app.get("/puzzle")
+@api_router.get("/puzzle")
 def read_random_puzzle(db: Session = Depends(get_db)):
     puzzle = get_random_puzzle(db)
     if puzzle:
@@ -65,7 +75,7 @@ def read_random_puzzle(db: Session = Depends(get_db)):
     return {"error": "No puzzles found."}
 
 
-@app.get("/puzzles")
+@api_router.get("/puzzles")
 def read_all_puzzles(db: Session = Depends(get_db)):
     puzzles = get_all_puzzles(db)
     if puzzles:
