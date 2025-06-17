@@ -1,9 +1,6 @@
 // Import CSS for Vite to process
 import "./index.css";
 
-// Log Vite environment mode
-console.log(`Running in ${import.meta.env.MODE} mode`);
-
 // Add a listener to show when the app is fully loaded
 document.addEventListener("DOMContentLoaded", () => {
   console.log("Sudoku Solver app loaded successfully");
@@ -17,17 +14,16 @@ const puzzleBtn = document.querySelector("#puzzle-btn");
 const squares = 81;
 const submission = [];
 
-// Access environment variables directly using import.meta.env
+// Load environment variables (Vite automatically loads VITE_* vars from .env)
+const apiUrl = import.meta.env.VITE_API_URL;
+const rapidApiKey = import.meta.env.VITE_RAPIDAPI_KEY;
+const rapidApiHost = import.meta.env.VITE_RAPIDAPI_HOST;
+
+// Create a config object to store all environment variables
 const config = {
-  // apiUrl: import.meta.env.VITE_API_URL || "http://localhost:8000/api/puzzle",
-  // rapidApiKey:
-  //   import.meta.env.VITE_RAPIDAPI_KEY ||
-  //   "429d4b4e4emshd73d3b4cccd15edp142cc9jsnc87c2c1511fa",
-  // rapidApiHost:
-  //   import.meta.env.VITE_RAPIDAPI_HOST || "solve-sudoku.p.rapidapi.com",
-  apiUrl: import.meta.env.VITE_API_URL,
-  rapidApiKey: import.meta.env.VITE_RAPIDAPI_KEY,
-  rapidApiHost: import.meta.env.VITE_RAPIDAPI_HOST,
+  apiUrl,
+  rapidApiKey,
+  rapidApiHost
 };
 
 const joinValues = () => {
@@ -49,16 +45,11 @@ const joinValues = () => {
       submission.push(".");
     }
   });
-  console.log("Submission array:", submission);
+  // console.log("Submission array:", submission);
 };
 
 const fillSolution = (isSolvable, solution) => {
   const inputs = document.querySelectorAll("#puzzle input");
-
-  console.log("fillSolution called with:", {
-    isSolvable,
-    solution: solution ? "provided" : "not provided",
-  });
 
   if (isSolvable === true && solution) {
     // Puzzle is solvable and we have a solution
@@ -101,20 +92,15 @@ const setPuzzle = (puzzle) => {
 
 const loadPuzzle = async () => {
   try {
-    // Fix the URL path - the /puzzle might already be included in the API_URL
-    const apiUrl = config.apiUrl.endsWith("/puzzle")
-      ? config.apiUrl
-      : `${config.apiUrl}/puzzle`;
-
     const options = {
       method: "GET",
-      url: apiUrl,
+      url: `${config.apiUrl}/puzzle`,
       headers: {
         "Content-Type": "application/json",
       },
     };
 
-    console.log(`Fetching puzzle from: ${apiUrl}`);
+    console.log(`Fetching puzzle from: ${config.apiUrl}`);
 
     // Make the request to your API using axios
     const response = await axios.request(options);
@@ -147,8 +133,6 @@ const solve = async () => {
   joinValues();
 
   const puzzleString = submission.join("");
-  console.log("Puzzle to solve:", puzzleString);
-  console.log("Puzzle string length:", puzzleString.length);
 
   // Debug the puzzle format
   let validChars = 0;
@@ -161,7 +145,6 @@ const solve = async () => {
       invalidChars.push({ index: i, char: char });
     }
   }
-  console.log(`Valid characters: ${validChars}/${puzzleString.length}`);
   if (invalidChars.length > 0) {
     console.log("Invalid characters found:", invalidChars);
   }
@@ -180,7 +163,6 @@ const solve = async () => {
 
   // Check if RapidAPI key is available
   if (!config.rapidApiKey || config.rapidApiKey === "your-api-key-here") {
-    console.error("Missing RapidAPI key");
     showStatus("Error: Missing API key for solver service", true);
     return;
   }
@@ -195,52 +177,20 @@ const solve = async () => {
       "Content-Type": "application/json",
       Accept: "application/json",
     },
-    // With axios, don't stringify the data - axios does that for you
     data: {
       puzzle: puzzleString,
     },
   };
 
-  // Let's print the exact JSON payload for debugging
-  console.log(
-    "Request payload:",
-    JSON.stringify({
-      puzzle: puzzleString,
-    }),
-  );
-
   try {
-    console.log(`Sending solve request to: https://${config.rapidApiHost}/`);
-    console.log("Request options:", {
-      method: options.method,
-      url: options.url,
-      headers: {
-        ...options.headers,
-        "x-rapidapi-key": "***", // Don't log the actual key
-      },
-      data: options.data,
-    });
-
     const response = await axios.request(options);
-
-    // Log detailed response information
-    console.log("API Response Status:", response.status);
-    console.log("API Response Headers:", response.headers);
-    console.log("API Response Data:", JSON.stringify(response.data, null, 2));
 
     if (response.data) {
       const isSolvable = response.data.solvable;
       const solution = response.data.solution;
 
-      console.log("Is puzzle solvable?", isSolvable);
-      console.log(
-        "Solution:",
-        solution ? solution.substring(0, 20) + "..." : "none",
-      );
-
       // Check if both values are present and valid
       if (isSolvable === undefined) {
-        console.error("API response missing solvable property");
         showStatus("Invalid API response format", true);
         return;
       }
@@ -250,7 +200,6 @@ const solve = async () => {
       showStatus("Invalid response from solver service", true);
     }
   } catch (error) {
-    console.error("Error solving puzzle:", error);
     showStatus(`Failed to solve puzzle: ${error.message}`, true);
   }
 };
