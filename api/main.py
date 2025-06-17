@@ -31,7 +31,7 @@ def get_db():
         db.close()
 
 
-@app.get("/api/")
+@app.get("/")
 def read_api_root():
     return {
         "message": "Welcome to the Sudoku Solver API",
@@ -57,7 +57,7 @@ def read_api_root():
     }
 
 
-@app.get("/api/puzzle")
+@app.get("/puzzle")
 def read_random_puzzle(db: Session = Depends(get_db)):
     puzzle = get_random_puzzle(db)
     if puzzle:
@@ -65,7 +65,7 @@ def read_random_puzzle(db: Session = Depends(get_db)):
     return {"error": "No puzzles found."}
 
 
-@app.get("/api/puzzles")
+@app.get("/puzzles")
 def read_all_puzzles(db: Session = Depends(get_db)):
     puzzles = get_all_puzzles(db)
     if puzzles:
